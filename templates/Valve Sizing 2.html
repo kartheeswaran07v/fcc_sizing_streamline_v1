@@ -142,11 +142,12 @@
                 <tr>
                   <td><label style="margin-left:5px;" for="flowrate">Flowrate</label></td>
                   <td>
-                    <select name="" id="unit" style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="">m3/hr</option>
-<!--                      <option value="">2</option>-->
-<!--                      <option value="">3</option>-->
-<!--                      <option value="">4</option>-->
+                    <select name="flowrate_unit" id="unit" style="width:90px; height: 23px;border: 1px solid white;">
+                      <option value="m3/hr">m3/hr</option>
+                      <option value="scfh">scfh</option>
+                      <option value="gpm">gpm</option>
+                      <option value="lb/hr">lb/hr</option>
+                      <option value="kg/hr">kg/hr</option>
                     </select>
                   </td>
                   {% for i in cases %}
@@ -160,11 +161,29 @@
                 <tr>
                   <td><label style="margin-left:5px;" for="iPressure">Inlet Pressure</label></td>
                   <td>
-                    <select name="" id=" " style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="">bar(g)</option>
-<!--                      <option value="">2</option>-->
-<!--                      <option value="">3</option>-->
-<!--                      <option value="">4</option>-->
+                    <select name="iPresUnit" style="width:90px; height: 23px;border: 1px solid white;">
+                      <option value="bar">bar(g)</option>
+                      <option value="bar">bar(a)</option>
+                      <option value="kpa">KPa(a)</option>
+                      <option value="kpa">KPa(g)</option>
+                      <option value="mpa">MPa(a)</option>
+                      <option value="mpa">MPa(g)</option>
+                      <option value="pa">Pa(a)</option>
+                      <option value="pa">Pa(g)</option>
+                      <option value="inh20">in H2O(a)</option>
+                      <option value="inh20">in H2O(g)</option>
+                      <option value="inhg">in Hg(a)</option>
+                      <option value="inhg">in Hg(g)</option>
+                      <option value="kg/cm2">kg/cm²(a)</option>
+                      <option value="kg/cm2">kg/cm²(g)</option>
+                      <option value="">m H20(a)</option>
+                      <option value="mmh20">m H20(g)</option>
+                      <option value="mbar">mbar(a)</option>
+                      <option value="mbar">mbar(g)</option>
+                      <option value="mmhg">mm Hg(a)</option>
+                      <option value="mmhg">mm Hg(g)</option>
+                      <option value="psia">psi(a)</option>
+                      <option value="psia">psi(g)</option>
                     </select>
                   </td>
                   {% for i in cases %}
@@ -177,11 +196,29 @@
                 <tr>
                   <td><label style="margin-left:5px;" for="oPressure">Outlet Pressure</label></td>
                   <td>
-                    <select name="" id=" " style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="">bar(g)</option>
-<!--                      <option value="">2</option>-->
-<!--                      <option value="">3</option>-->
-<!--                      <option value="">4</option>-->
+                    <select name="oPresUnit" style="width:90px; height: 23px;border: 1px solid white;">
+                      <option value="bar">bar(g)</option>
+                      <option value="bar">bar(a)</option>
+                      <option value="kpa">KPa(a)</option>
+                      <option value="kpa">KPa(g)</option>
+                      <option value="mpa">MPa(a)</option>
+                      <option value="mpa">MPa(g)</option>
+                      <option value="pa">Pa(a)</option>
+                      <option value="pa">Pa(g)</option>
+                      <option value="inh20">in H2O(a)</option>
+                      <option value="inh20">in H2O(g)</option>
+                      <option value="inhg">in Hg(a)</option>
+                      <option value="inhg">in Hg(g)</option>
+                      <option value="kg/cm2">kg/cm²(a)</option>
+                      <option value="kg/cm2">kg/cm²(g)</option>
+                      <option value="">m H20(a)</option>
+                      <option value="mmh20">m H20(g)</option>
+                      <option value="mbar">mbar(a)</option>
+                      <option value="mbar">mbar(g)</option>
+                      <option value="mmhg">mm Hg(a)</option>
+                      <option value="mmhg">mm Hg(g)</option>
+                      <option value="psia">psi(a)</option>
+                      <option value="psia">psi(g)</option>
                     </select>
                   </td>
                   {% for i in cases %}
@@ -194,11 +231,11 @@
                 <tr>
                   <td><label style="margin-left:5px;" for="iTemp">Inlet Temprature</label></td>
                   <td>
-                    <select name="" id=" " style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="">°C</option>
-<!--                      <option value="">2</option>-->
-<!--                      <option value="">3</option>-->
-<!--                      <option value="">4</option>-->
+                    <select name="iTempUnit" style="width:90px; height: 23px;border: 1px solid white;">
+                      <option value="C">°C</option>
+                      <option value="F">°F</option>
+                      <option value="K">K</option>
+                      <option value="R">R</option>
                     </select>
                   </td>
                   {% for i in cases %}
@@ -221,11 +258,29 @@
                 <tr>
                   <td><label style="margin-left:5px;" for="vPressure">Vapor Pressure</label></td>
                   <td>
-                    <select name="" id=" " style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="">bar(g)</option>
-<!--                      <option value="">2</option>-->
-<!--                      <option value="">3</option>-->
-<!--                      <option value="">4</option>-->
+                    <select name="vPresUnit" style="width:90px; height: 23px;border: 1px solid white;">
+                      <option value="bar">bar(g)</option>
+                      <option value="bar">bar(a)</option>
+                      <option value="kpa">KPa(a)</option>
+                      <option value="kpa">KPa(g)</option>
+                      <option value="mpa">MPa(a)</option>
+                      <option value="mpa">MPa(g)</option>
+                      <option value="pa">Pa(a)</option>
+                      <option value="pa">Pa(g)</option>
+                      <option value="inh20">in H2O(a)</option>
+                      <option value="inh20">in H2O(g)</option>
+                      <option value="inhg">in Hg(a)</option>
+                      <option value="inhg">in Hg(g)</option>
+                      <option value="kg/cm2">kg/cm²(a)</option>
+                      <option value="kg/cm2">kg/cm²(g)</option>
+                      <option value="">m H20(a)</option>
+                      <option value="mmh20">m H20(g)</option>
+                      <option value="mbar">mbar(a)</option>
+                      <option value="mbar">mbar(g)</option>
+                      <option value="mmhg">mm Hg(a)</option>
+                      <option value="mmhg">mm Hg(g)</option>
+                      <option value="psia">psi(a)</option>
+                      <option value="psia">psi(g)</option>
                     </select>
                   </td>
                   {% for i in cases %}
@@ -306,14 +361,7 @@
 
                 <tr>
                   <td> <label style="margin-left:5px;" for="">Inlet Velocity</label></td>
-                  <td>
-                    <select name="" id=" " style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="">m/s</option>
-<!--                      <option value="">2</option>-->
-<!--                      <option value="">3</option>-->
-<!--                      <option value="">4</option>-->
-                    </select>
-                  </td>
+                  <td>m/s</td>
                   {% for i in cases %}
                     <td class="">{{i.iVelocity}}</td>
                   {% endfor %}
@@ -475,12 +523,30 @@
                   <input type="text" name="cPressure" id="cPressure" value="" style="width: 70px;height: 25px;">
                 </div>
                 <div class="col-3">
-<!--                  <select name="" id=" " style=" height: 25px; width: 50px;padding-left: 10px;">-->
-<!--                    <option value="">bar(g)</option>-->
-<!--&lt;!&ndash;                    <option value="">2</option>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <option value="">3</option>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <option value="">4</option>&ndash;&gt;-->
-<!--                  </select>-->
+                  <select name="cPresUnit"  style=" height: 25px; width: 80px;padding-left: 10px;">
+                    <option value="bar">bar(g)</option>
+                      <option value="bar">bar(a)</option>
+                      <option value="kpa">KPa(a)</option>
+                      <option value="kpa">KPa(g)</option>
+                      <option value="mpa">MPa(a)</option>
+                      <option value="mpa">MPa(g)</option>
+                      <option value="pa">Pa(a)</option>
+                      <option value="pa">Pa(g)</option>
+                      <option value="inh20">in H2O(a)</option>
+                      <option value="inh20">in H2O(g)</option>
+                      <option value="inhg">in Hg(a)</option>
+                      <option value="inhg">in Hg(g)</option>
+                      <option value="kg/cm2">kg/cm²(a)</option>
+                      <option value="kg/cm2">kg/cm²(g)</option>
+                      <option value="">m H20(a)</option>
+                      <option value="mmh20">m H20(g)</option>
+                      <option value="mbar">mbar(a)</option>
+                      <option value="mbar">mbar(g)</option>
+                      <option value="mmhg">mm Hg(a)</option>
+                      <option value="mmhg">mm Hg(g)</option>
+                      <option value="psia">psi(a)</option>
+                      <option value="psia">psi(g)</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -500,18 +566,18 @@
                 <div class="col-5" style='text-align: right;'>
                   <label for="iPipeSize">Inlet Pipe Size</label>
                 </div>
-                <div class="col-6">
+                <div class="col-2">
                   <input type="text" name="iPipeSize" id="iPipeSize" value="" style="width: 70px;height: 25px;">
                 </div>
 
-<!--                <div class="col-2">-->
-<!--                  <select name="" id="" style="width: 50px;height:25px;">-->
-<!--&lt;!&ndash;                    <option value="">1</option>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <option value="">2</option>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <option value="">3</option>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <option value="">4</option>&ndash;&gt;-->
-<!--                  </select>-->
-<!--                </div>-->
+                <div class="col-1">
+                  <select name="iPipeUnit" id="" style="width: 50px;height:25px;">
+                    <option value="in">in</option>
+                    <option value="m">m</option>
+                    <option value="mm">mm</option>
+                    <option value="cm">cm</option>
+                  </select>
+                </div>
 
 <!--                <div class="col-5" style='text-align: right;height:25px;'>-->
 <!--                  <label for="">Schedule Thickness</label>-->
@@ -540,14 +606,14 @@
                   <input type="text" name="oPipeSize" id="oPipeSize" value="" style="width: 70px;height: 25px;">
                 </div>
 
-<!--                <div class="col-2">-->
-<!--                  <select name="2" id="" style="width: 50px;height:25px;">-->
-<!--                    <option value="">ins</option>-->
-<!--&lt;!&ndash;                    <option value="">2</option>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <option value="">3</option>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <option value="">4</option>&ndash;&gt;-->
-<!--                  </select>-->
-<!--                </div>-->
+                <div class="col-1">
+                  <select name="oPipeUnit" style="width: 50px;height:25px;">
+                    <option value="in">in</option>
+                    <option value="m">m</option>
+                    <option value="mm">mm</option>
+                    <option value="cm">cm</option>
+                  </select>
+                </div>
 
 <!--                <div class="col-5" style='text-align: right;height:25px;'>-->
 <!--                  <label for="">Schedule Thickness</label>-->
