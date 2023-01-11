@@ -148,3 +148,62 @@ def findCv(dia):
                 C_Lower = C_Lower
         else:
             return "Wrong dia"
+
+
+# Unit Conversion Logic
+def convert_L_SI(val, unit_in, unit_out, density):
+    SI = {'mm': 0.001, 'cm': 0.01, 'm': 1.0, 'km': 1000.0, 'inch': 0.0254}
+    return val * SI[unit_in] / SI[unit_out]
+
+
+def conver_P_SI(val, unit_in, unit_out, density):
+    SI = {'psia': 6894.76, 'kg/cm2': 98066.5, 'pa': 1, 'kpa': 1000, 'bar': 100000, 'mpa': 1000000,
+          'inh20': 0.00401865, 'mmh20': 0.10197162129, 'inhg': 0.0002953, 'mmhg': 0.00750062, 'mbar': 0.01}
+    return val * SI[unit_in] / SI[unit_out]
+
+
+def convert_T_SI(val, unit_in, unit_out, density):
+    def c_to_c(value):
+        return value
+
+    def c_to_f(value):
+        return 1.8 * value + 32
+
+    def c_to_k(value):
+        return value + 273.15
+
+    def c_to_r(value):
+        return 1.8 * value + 491.67
+
+    def f_to_c(value):
+        return (value - 32) * (5 / 9)
+
+    def k_to_c(value):
+        return value - 273.15
+
+    def r_to_c(value):
+        return (value - 491.67) * (5 / 9)
+
+    SI = {'F': c_to_f, 'K': c_to_k, 'R': c_to_r, 'C': c_to_c}
+    SI_2 = {'F': f_to_c, 'K': k_to_c, 'R': r_to_c, 'C': c_to_c}
+
+    # val_to_c = SI[unit_in](val)
+    return SI[unit_out](SI_2[unit_in](val))
+
+
+def conver_FR_SI(val, unit_in, unit_out, density):
+    SI = {'m3/hr': 1, 'scfh': 1 / 35.31, 'gpm': 1 / 4.402868, 'lb/hr': 1 / (2.2 * density), 'kg/hr': 1 / density}
+    return val * SI[unit_in] / SI[unit_out]
+
+
+def meta_convert_P_T_FR_L(prop, val, unit_in, unit_out, density):
+    properties = {"T": convert_T_SI, "P": conver_P_SI, "FR": conver_FR_SI, "L": convert_L_SI}
+    return properties[prop](val, unit_in, unit_out, density)
+
+
+# print(meta_convert_P_T_FR_L('T', 10, 'K', 'C', 1000))
+# props: T, P, FR, L
+# Temp units: K, R, C, F
+# Pressure units: 'psia', 'kg/cm2', 'pa', 'kpa', 'bar', 'mpa', 'inh20', 'mmh20', 'inhg', 'mmhg', 'mbar'
+# Length units: M, Inches, MilliMeters, KiloMeters, Centimeters - m, in, mm, km, cm
+# Flow Rate units: m3/hr, scfh, gpm, lb/hr, kg/hr
