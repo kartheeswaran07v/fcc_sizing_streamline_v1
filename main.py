@@ -1863,6 +1863,10 @@ def convert_project_data(project_list):
         for i in project_list:
             industry_updated = db.session.query(industryMaster).filter_by(id=i.IndustryId).first()
             region_updated = db.session.query(regionMaster).filter_by(id=i.regionID).first()
+            if region_updated:
+                region_updated = region_updated
+            else:
+                region_updated = db.session.query(regionMaster).filter_by(id=1).first()
             status_updated = db.session.query(statusMaster).filter_by(id=i.statusID).first()
             customer_updated = db.session.query(customerMaster).filter_by(id=i.customerID).first()
             engineer_updated = db.session.query(engineerMaster).filter_by(id=i.engineerID).first()
