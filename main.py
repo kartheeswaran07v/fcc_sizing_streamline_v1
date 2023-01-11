@@ -1916,6 +1916,36 @@ def convert_item_data(list_item):
             rating_updated = db.session.query(rating).filter_by(id=i.ratingID).first()
             material_updated = db.session.query(materialMaster).filter_by(id=i.materialID).first()
 
+            if serial_updated:
+                serial_updated = serial_updated
+            else:
+                serial_updated = db.session.query(valveSeries).filter_by(id=1).first()
+
+            if size_updated:
+                size_updated = size_updated
+            else:
+                size_updated = db.session.query(valveSize).filter_by(id=5).first()
+
+            if model_updated:
+                model_updated = model_updated
+            else:
+                model_updated = db.session.query(modelMaster).filter_by(id=1).first()
+
+            if type_updated:
+                type_updated = type_updated
+            else:
+                type_updated = db.session.query(valveStyle).filter_by(id=1).first()
+
+            if rating_updated:
+                rating_updated = rating_updated
+            else:
+                rating_updated = db.session.query(rating).filter_by(id=1).first()
+
+            if material_updated:
+                material_updated = material_updated
+            else:
+                material_updated = db.session.query(materialMaster).filter_by(id=1).first()
+
             item_updated = {"id": i.id, "alt": i.alt, "tag_no": i.tag_no, "unit_price": i.unit_price,
                             "qty": i.qty, "projectID": i.projectID, "serialID": serial_updated.name,
                             "sizeID": size_updated.size, "modelID": model_updated.name, "typeID": type_updated.name,
