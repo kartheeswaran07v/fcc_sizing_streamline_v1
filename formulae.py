@@ -201,6 +201,12 @@ def meta_convert_P_T_FR_L(prop, val, unit_in, unit_out, density):
     return properties[prop](val, unit_in, unit_out, density)
 
 
+def conver_FR_noise(val, unit_in):
+    SI = {'m3/hr': 0.001, 'scfh': 0.049, 'gpm': 0.0060, 'lb/hr': 2.20462, 'kg/hr': 1}
+    a = (val * SI[unit_in] / SI['kg/hr']) / 3600
+    return a
+
+
 # print(meta_convert_P_T_FR_L('T', 10, 'K', 'C', 1000))
 # props: T, P, FR, L
 # Temp units: K, R, C, F

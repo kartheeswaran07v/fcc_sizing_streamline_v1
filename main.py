@@ -9,6 +9,8 @@ import csv
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import pandas
 from formulae import *
+from liquid_noise_formulae import Lpe1m
+from gas_noise_formulae import lpae_1m
 
 # -----------^^^^^^^^^^^^^^----------------- IMPORT STATEMENTS -----------------^^^^^^^^^^^^^------------ #
 
@@ -1484,353 +1486,6 @@ def getVelocity(Flowrate, inletDia, outletDia, valveDia):
     return inletVelocity, outletVelocity, valveVelocity
 
 
-# TODO - Liquid noise calculations
-
-N0 = 1
-N14 = 0.0046
-N34 = 1.17
-
-Cv1 = [0, 1688, 2531.3, 2742.188, 2847.656, 2953.125, 3375, 6750]
-FL1 = [0.85, 0.713, 0.645, 0.627, 0.619, 0.61, 0.576, 0.54]
-
-
-# Cv1 = [0, 17.2, 50.2, 87.8, 146, 206, 285, 365, 465, 521, 1000]
-# FL1 = [0.85, 0.85, 0.84, 0.79, 0.75, 0.71, 0.63, 0.58, 0.56, 0.54, 0.54]
-
-# 1
-def getFL_v(C):
-    a = 0
-    while True:
-        if Cv1[a] == C:
-            return FL1[a]
-        elif Cv1[a] > C:
-            break
-        else:
-            a += 1
-
-    Fllll = FL1[a - 1] - (((Cv1[a - 1] - C) / (Cv1[a - 1] - Cv1[a])) * (FL1[a - 1] - FL1[a]))
-
-    # return round(Fllll, 3)
-    return 0.9
-
-
-# rW
-# 2
-def getAcousticPower():
-    return 5
-
-
-# Pressure recovery ratio
-# 3
-def xF(inletPressure, outletPressure, vaporPressure):
-    print(f'XF: {(inletPressure - outletPressure) / (inletPressure - vaporPressure)}')
-    return (inletPressure - outletPressure) / (inletPressure - vaporPressure)
-
-
-# 4
-def deltaPC(C, inletPressure, outletPressure, vaporPressure):
-    a = inletPressure - outletPressure
-    b = (getFL_v(C) ** 2) * (inletPressure - vaporPressure)
-    print(f"deltaPC: {min(a, b)}")
-    return min(a, b)
-
-
-# 5
-def xFZ(holeDia, C, Fd):
-    if holeDia == 0:
-        a = 0.90 / math.sqrt(1 + (3 * Fd * math.sqrt(C / (N34 * getFL_v(C)))))
-        # For hole trim
-    else:
-        a = 1 / math.sqrt(4.5 + (1.650 * N0 * holeDia * holeDia / getFL_v(C)))
-
-    print(f"xFZ: {a}")
-    return a
-
-
-# 6
-# Differential Pressure ratio corrected at inlet
-def XFZP1(holeDia, C, Fd, inletPressure):
-    a = xFZ(holeDia, C, Fd) * ((600000 / inletPressure) ** 0.125)
-    print(f"xFZP1: {a}")
-    return a
-
-
-# 7
-# Dj
-def jetDia(Fd, C):
-    print(f"jetDia: {N14 * Fd * math.sqrt(C * getFL_v(C))}")
-    return N14 * Fd * math.sqrt(C * getFL_v(C))
-
-
-# 8
-# Uvc
-def jetVelocity(C, inletPressure, outletPressure, vaporPressure, density):
-    a = (1 / getFL_v(C)) * (math.sqrt(2 * deltaPC(C, inletPressure, outletPressure, vaporPressure) / density))
-    print(f"jetVelocity: {a}")
-    return a
-
-
-# 9
-# Wm
-def mechanicalPower(massFlowRate, C, inletPressure, outletPressure, vaporPressure, density):
-    Wm = massFlowRate * (jetVelocity(C, inletPressure, outletPressure, vaporPressure, density) ** 2) * getFL_v(
-        C) * getFL_v(
-        C) * 0.5
-    print(f"Mechanical Power: {Wm}")
-    return Wm
-
-
-# 10
-# TODO 5 - Cav vs Turbulent
-def etaTurb(C, inletPressure, outletPressure, vaporPressure, density, speedS):
-    print(
-        f"etaTurb value is: {(10 ** (-4)) * (jetVelocity(C, inletPressure, outletPressure, vaporPressure, density) / speedS)}")
-    return (10 ** (-4)) * (jetVelocity(C, inletPressure, outletPressure, vaporPressure, density) / speedS)
-
-
-# 11
-def etaCav(C, inletPressure, outletPressure, vaporPressure, density, speedS, holeDia, Fd):
-    etaTurbulent = etaTurb(C, inletPressure, outletPressure, vaporPressure, density, speedS)
-    delta_PC = deltaPC(C, inletPressure, outletPressure, vaporPressure)
-    xfzp_1 = XFZP1(holeDia, C, Fd, inletPressure)
-    xf = xF(inletPressure, outletPressure, vaporPressure)
-    deltaP = inletPressure - outletPressure
-    ePower5 = 2.718281828459045 ** (5 * xfzp_1)
-    a1 = 0.32 * etaTurbulent * math.sqrt(deltaP / (delta_PC * xfzp_1)) * ePower5
-    a2 = ((1 - xfzp_1) / (1 - xf)) ** 0.5
-    a3 = (xf / xfzp_1) ** 5
-    a4 = (xf - xfzp_1) ** 1.5
-    print(f"etaCav: {a1 * a2 * a3 * a4}")
-    return a1 * a2 * a3 * a4
-
-
-# 12
-# Wa
-def soundPower(C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW, holeDia, Fd):
-    etaCavitation = etaCav(C, inletPressure, outletPressure, vaporPressure, density, speedS, holeDia, Fd)
-    etaTurbulent = etaTurb(C, inletPressure, outletPressure, vaporPressure, density, speedS)
-    wm = mechanicalPower(massFlowRate, C, inletPressure, outletPressure, vaporPressure, density)
-    a = 1
-    if a == 1:
-        print(f"Sound Power: {etaTurbulent * wm * rW}")
-        return etaTurbulent * wm * rW
-    else:
-        return (etaTurbulent + etaCavitation) * wm * rW
-
-
-# 13
-# Lpi
-def overallInternalSound(Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW,
-                         holeDia, internalPipeDia):
-    sound_power = soundPower(C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW,
-                             holeDia, Fd)
-    a_ = ((3.2 * (10 ** 9)) * sound_power * density * speedS) / (internalPipeDia * internalPipeDia)
-    print(f"Overall Internal Sound: {10 * math.log10(a_)}")
-    return 10 * math.log10(a_)
-
-
-# 14
-# N_STR
-def strouhalNumber(Fd, C, inletPressure, vaporPressure, holeDia, seatDia, valveDia):
-    pressure_coeff = (1 / (inletPressure - vaporPressure)) ** 0.57
-    xfzp_1 = XFZP1(holeDia, C, Fd, inletPressure)
-    denom = N34 * (xfzp_1 ** 1.5) * valveDia * seatDia
-    fl = getFL_v(C)
-    numer = 0.02 * fl * fl * C
-    numer2 = 0.036 * fl * fl * C * (Fd ** 0.75)
-    print(f"Strouhal Number: {numer2 * pressure_coeff / denom}")
-    return numer2 * pressure_coeff / denom
-
-
-# 15
-# TODO 4 - Cav vs Turbulent
-# Fp_turb
-def internalPeakSound(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia):
-    N_STR = strouhalNumber(Fd, C, inletPressure, vaporPressure, holeDia, seatDia, valveDia)
-    jet_velocity = jetVelocity(C, inletPressure, outletPressure, vaporPressure, density)
-    jet_dia = jetDia(Fd, C)
-    print(f"Internal Peak Sound: {N_STR * jet_velocity / jet_dia}")
-    return N_STR * jet_velocity / jet_dia
-
-
-# 16
-def fpCav(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia):
-    fp_turb = internalPeakSound(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia,
-                                valveDia)
-    xfzp_1 = XFZP1(holeDia, C, Fd, inletPressure)
-    xf = xF(inletPressure, outletPressure, vaporPressure)
-    a_ = ((1 - xf) / (1 - xfzp_1)) ** 2
-    b_ = (xfzp_1 / xf) ** 2.5
-    print(f"FP_Cav: {6 * fp_turb * a_ * b_}")
-    return 6 * fp_turb * a_ * b_
-
-
-# 17
-# fr
-def ringFrequency(internalPipeDia):
-    Cp = 5000  # Speed of sound in pipe
-    print(f"ring frequency: {Cp / (math.pi * internalPipeDia)}")
-    return Cp / (math.pi * internalPipeDia)
-
-
-# 18
-# TL_Fr
-def minTransmissionLoss(densityPipe, wallThicknessPipe, speedSinPipe, densityAir, internalPipeDia):
-    Co = 343  # speed of sound in air(m/s)
-    a_ = (speedSinPipe * densityPipe * wallThicknessPipe) / (Co * densityAir * internalPipeDia)
-    print(f"Min Transmission Loss: {-10 - (10 * math.log10(a_))}")
-    return -10 - (10 * math.log10(a_))
-
-
-# 19
-# delta_TL_(fp,turb)
-def deltaTransmissionLoss(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia,
-                          internalPipeDia):
-    fp_turb = internalPeakSound(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia,
-                                valveDia)
-    fr = ringFrequency(internalPipeDia)
-    a_ = fr / fp_turb
-    print(f"Delta Transmission Loss: {-20 * math.log10(a_ + (a_ ** (-1.5)))}")
-    return -20 * math.log10(a_ + (a_ ** (-1.5)))
-
-
-# 20
-# TODO 3 - Cav vs Turbulent
-# TL_turb
-def overallTransmissionLoss(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia,
-                            internalPipeDia, densityPipe, wallThicknessPipe, speedSinPipe, densityAir):
-    delta_TL_fp_turb = deltaTransmissionLoss(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia,
-                                             seatDia, valveDia, internalPipeDia)
-    TL_fr = minTransmissionLoss(densityPipe, wallThicknessPipe, speedSinPipe, densityAir, internalPipeDia)
-    print(f"Overall Transmission Loss: {delta_TL_fp_turb + TL_fr}")
-    return delta_TL_fp_turb + TL_fr
-
-
-# 21
-# TL_cav
-def overTransmissionLossCav(Fd, C, inletPressure, outletPressure, density, speedS, vaporPressure, holeDia, seatDia,
-                            valveDia, internalPipeDia, densityPipe, wallThicknessPipe, speedSinPipe, densityAir):
-    TL_turb = overallTransmissionLoss(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia,
-                                      valveDia, internalPipeDia, densityPipe, wallThicknessPipe, speedSinPipe,
-                                      densityAir)
-    fp_cav = fpCav(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia)
-    fp_turb = internalPeakSound(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia,
-                                valveDia)
-    eta_cav = etaCav(C, inletPressure, outletPressure, vaporPressure, density, speedS, holeDia, Fd)
-    eta_turb = etaTurb(C, inletPressure, outletPressure, vaporPressure, density, speedS)
-    a_ = 250 * ((fp_cav ** 1.5) / (fp_turb ** 2)) * (eta_cav / (eta_turb + eta_cav))
-    print(f" Overall transmission Loss Cav: {TL_turb + 10 * math.log10(a_)}")
-    return TL_turb + 10 * math.log10(a_)
-
-
-#  Table 3 – Indexed third octave center frequencies and “A” weighting factors
-# f_i indexed frequency bands
-frequencies = [12.5, 16, 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
-               1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
-# delta_LA(fi)
-a_factor = [-63.4, -56.7, -50.5, -44.7, -39.4, -34.6, -30.2, -26.2, 22.5, -19.1, -16.1, -13.4, -10.9, -8.6, -6.6, -4.8,
-            -3.2, -1.9, -0.8, 0, 0.6, 1, 1.2, 1.3, 1.2, 1, 0.5, -0.1, -1.1, -2.5, -4.3, -6.6, -9.3]
-
-
-# 22
-# TODO 2 - Cav vs Turbulent
-# F_turb(f_i)
-def f_turbulence(fi, Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia):
-    fp_turb = internalPeakSound(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia,
-                                valveDia)
-    a_ = fi / fp_turb
-    b_ = fp_turb / fi
-    return -10 * math.log10((0.25 * (a_ ** 3)) + b_) - 3.1
-
-
-# 23
-# F-cav(fi)
-def f_cav(fi, Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia):
-    fp_cav = fpCav(Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia)
-    a_ = fi / fp_cav
-    b_ = fp_cav / fi
-    return -10 * math.log10((0.25 * (a_ ** 1.5)) + (b_ ** 1.5)) - 3.5
-
-
-# 24
-# TODO 1 - Cav vs Turbulent
-# Lpi(fi) - turbulent
-def LpiTurbulent(fi, Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW, holeDia,
-                 seatDia, valveDia, internalPipeDia):
-    Lpi = overallInternalSound(Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW,
-                               holeDia, internalPipeDia)
-    f_turb = f_turbulence(fi, Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia)
-    return Lpi + f_turb
-
-
-# 25
-# Lpi(fi) - cavitating
-def LpiCavitation(fi, Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW, holeDia,
-                  seatDia, valveDia, internalPipeDia):
-    Lpi = overallInternalSound(Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW,
-                               holeDia, internalPipeDia)
-    eta_cav = etaCav(C, inletPressure, outletPressure, vaporPressure, density, speedS, holeDia, Fd)
-    eta_turb = etaTurb(C, inletPressure, outletPressure, vaporPressure, density, speedS)
-    f_turb = f_turbulence(fi, Fd, C, inletPressure, outletPressure, density, vaporPressure, holeDia, seatDia, valveDia)
-    a_ = 10 ** (0.1 * f_turb)
-    b_ = (eta_turb * a_) / (eta_cav + eta_turb)
-    c_ = (eta_cav * a_) / (eta_cav + eta_turb)
-    return Lpi + 10 * math.log10(b_ + c_)
-
-
-# 26
-# delta_TL(fi)
-def delta_TL_fi(fi, internalPipeDia):
-    f_r = ringFrequency(internalPipeDia)
-    a_ = f_r / fi
-    return -20 * math.log10(a_ + (a_ ** (-1.5)))
-
-
-# 27
-# TL(fi) - transmission loss at fi
-def TL(fi, densityPipe, wallThicknessPipe, speedSinPipe, densityAir, internalPipeDia):
-    tl_fr = minTransmissionLoss(densityPipe, wallThicknessPipe, speedSinPipe, densityAir, internalPipeDia)
-    del_tl = delta_TL_fi(fi, internalPipeDia)
-    return tl_fr + del_tl
-
-
-# 28
-# Lpe,1m(fi)
-def Lpe1m(fi, Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW, holeDia, seatDia,
-          valveDia, densityPipe, wallThicknessPipe, speedSinPipe, densityAir, internalPipeDia):
-    # lpi_cav = LpiCavitation(fi, Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate,
-    # rW, holeDia, seatDia, valveDia)
-    lpi_turb = LpiTurbulent(fi, Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW,
-                            holeDia, seatDia, valveDia, internalPipeDia)
-    a = 5
-    lpi_cav = lpi_turb
-
-    if a == 5:
-        lpi = lpi_turb
-    else:
-        lpi = lpi_cav
-
-    tl_fi = TL(fi, densityPipe, wallThicknessPipe, speedSinPipe, densityAir, internalPipeDia)
-    a_ = (internalPipeDia + 2 * wallThicknessPipe + 2) / (internalPipeDia + 2 * wallThicknessPipe)
-    return lpi + tl_fi - 10 * math.log10(a_)
-
-
-# 29
-# final
-def summation(Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW, holeDia, seatDia,
-              valveDia, densityPipe, wallThicknessPipe, speedSinPipe, densityAir, internalPipeDia):
-    sum_ = 0
-    for f_i in frequencies:
-        a_ = 0.1 * Lpe1m(f_i, Fd, C, inletPressure, outletPressure, vaporPressure, density, speedS, massFlowRate, rW,
-                         holeDia, seatDia, valveDia, densityPipe, wallThicknessPipe, speedSinPipe, densityAir,
-                         internalPipeDia)
-        b_ = 10 ** a_
-        print(f"One of Sum value {frequencies.index(f_i)}: {b_}")
-        sum_ = sum_ + b_
-
-    return 10 * math.log10(sum_)
-
-
 # TODO - Power Level - Gas and Liquid
 # pressure in psi, plevel in kw
 def power_level_liquid(inletPressure, outletPressure, sGravity, Cv):
@@ -1891,8 +1546,6 @@ def convert_project_data(project_list):
                 engineer_updated = engineer_updated
             else:
                 engineer_updated = db.session.query(engineerMaster).filter_by(id=1).first()
-
-
 
             project_updated = {"id": i.id, "quote": i.quote, "received_date": i.received_date,
                                "work_order": i.work_order,
@@ -2398,9 +2051,9 @@ def valveSizing():
             print(valve_type)
 
             # from valveDetails
-            valveD = db.session.query(valveDetails).filter_by(itemID=item_selected.id).first()
-            rating_new = valveD.rating
-            flow_direction = valveD.flowDirection_v
+            # valveD = db.session.query(valveDetails).filter_by(itemID=item_selected.id).first()
+            # rating_new = valveD.rating
+            # flow_direction = valveD.flowDirection_v
             # print(rating_new, flow_direction)
             # db.session.expunge_all()
 
@@ -2526,12 +2179,51 @@ def valveSizing():
                                      service_conditions_1['vPres'], service_conditions_1['oPres'])
 
                 # noise and velocities
-                summation1 = summation(C=113.863, inletPressure=1000000, outletPressure=900000, density=974.1,
-                                       vaporPressure=10000,
-                                       speedS=4000, massFlowRate=27.06, Fd=0.23, densityPipe=7800, speedSinPipe=5000,
-                                       wallThicknessPipe=0.0002, internalPipeDia=0.1000, seatDia=0.1, valveDia=0.1,
-                                       densityAir=1.293,
-                                       holeDia=0, rW=0.25)
+                # Liquid Noise - need flowrate in kg/s, valves in m, density in kg/m3, pressure in pa
+                # convert form data in units of noise formulae
+                valveDia_lnoise = meta_convert_P_T_FR_L('L', size, 'inch', 'm', 1000)
+                iPipeDia_lnoise = meta_convert_P_T_FR_L('L', inletPipeDia_form, request.form.get('iPipeUnit'), 'm',
+                                                        1000)
+                oPipeDia_lnoise = meta_convert_P_T_FR_L('L', outletPipeDia_form, request.form.get('oPipeUnit'), 'm',
+                                                        1000)
+                flowrate_lnoise = meta_convert_P_T_FR_L('FR', flowrate_form, request.form.get('flowrate_unit'), 'kg/hr',
+                                                        specificGravity * 1000) / 3600
+                outletPressure_lnoise = meta_convert_P_T_FR_L('P', outletPressure_form, request.form.get('oPresUnit'),
+                                                              'pa', 1000)
+                inletPressure_lnoise = meta_convert_P_T_FR_L('P', inletPressure_form, request.form.get('iPresUnit'),
+                                                             'pa', 1000)
+                vPres_lnoise = meta_convert_P_T_FR_L('P', vaporPressure, request.form.get('vPresUnit'), 'pa', 1000)
+                print(f"3 press: {outletPressure_lnoise, inletPressure_lnoise, vPres_lnoise}")
+                # service conditions for 4 inch vale with 8 as line size. CVs need to be changed
+                sc_liq_sizing = {'valveDia': valveDia_lnoise, 'ratedCV': 203, 'reqCV': 121.7, 'FL': 0.84,
+                                 'FD': 0.42,
+                                 'iPipeDia': iPipeDia_lnoise, 'iPipeUnit': 'm', 'oPipeDia': oPipeDia_lnoise,
+                                 'oPipeUnit': 'm',
+                                 'internalPipeDia': oPipeDia_lnoise,
+                                 'inPipeDiaUnit': 'm', 'pipeWallThickness': 0.0036, 'speedSoundPipe': 5000,
+                                 'speedSoundPipeUnit': 'm/s',
+                                 'densityPipe': 7800, 'densityPipeUnit': 'kg/m3', 'speedSoundAir': 343,
+                                 'densityAir': 1293,
+                                 'massFlowRate': flowrate_lnoise, 'massFlowRateUnit': 'kg/s',
+                                 'iPressure': inletPressure_lnoise,
+                                 'iPresUnit': 'pa',
+                                 'oPressure': outletPressure_lnoise,
+                                 'oPresUnit': 'pa', 'vPressure': vPres_lnoise, 'densityLiq': specificGravity * 1000,
+                                 'speedSoundLiq': 1400,
+                                 'rw': 0.25,
+                                 'seatDia': 0.1,
+                                 'fi': 8000}
+
+                sc_1 = sc_liq_sizing
+                summation = Lpe1m(sc_1['fi'], sc_1['FD'], sc_1['reqCV'], sc_1['iPressure'], sc_1['oPressure'],
+                                  sc_1['vPressure'],
+                                  sc_1['densityLiq'], sc_1['speedSoundLiq'], sc_1['massFlowRate'], sc_1['rw'],
+                                  sc_1['FL'],
+                                  sc_1['seatDia'], sc_1['valveDia'], sc_1['densityPipe'], sc_1['pipeWallThickness'],
+                                  sc_1['speedSoundPipe'],
+                                  sc_1['densityAir'], sc_1['internalPipeDia'], sc_1['speedSoundAir'],
+                                  sc_1['speedSoundPipe'])
+                # summation = 56
 
                 # Power Level
                 outletPressure_p = meta_convert_P_T_FR_L('P', outletPressure_form, request.form.get('oPresUnit'),
@@ -2560,7 +2252,7 @@ def valveSizing():
 
                 data = {'cv': round(result, 3),
                         'percent': 80,
-                        'spl': round(summation1, 3),
+                        'spl': round(summation, 3),
                         'iVelocity': iVelocity,
                         'oVelocity': round(oVelocity, 3), 'pVelocity': round(pVelocity, 3), 'choked': round(chokedP, 3),
                         'texVelocity': round(tEX, 3)}
@@ -2571,7 +2263,7 @@ def valveSizing():
                                      iTemp=inletTemp_form, sGravity=specificGravity,
                                      vPressure=vaporPressure, viscosity=viscosity, vaporMW=None, vaporInlet=None,
                                      CV=round(result, 3), openPercent=data['percent'],
-                                     valveSPL=round(summation1, 2), iVelocity=round(iVelocity, 2),
+                                     valveSPL=round(summation, 2), iVelocity=round(iVelocity, 2),
                                      oVelocity=round(oVelocity, 2), pVelocity=round(pVelocity, 2),
                                      chokedDrop=round(chokedP, 3),
                                      Xt=None, warning=1, trimExVelocity=data['texVelocity'],
@@ -2726,20 +2418,22 @@ def valveSizing():
                                       xT=inputDict['xT'])
 
                 # noise and velocities
-                # convert values to noise units - Pressure in Pa, density in kg/m3, speed in m/s, flowrate in m3/hr, L in m
-                inletPressure_noise = meta_convert_P_T_FR_L('P', inletPressure_form, request.form.get('iPresUnit'),
-                                                            'pa',
-                                                            1000)
-                outletPressure_noise = meta_convert_P_T_FR_L('P', outletPressure_form, request.form.get('oPresUnit'),
+                # Liquid Noise - need flowrate in kg/s, valves in m, density in kg/m3, pressure in pa
+                inletPressure_gnoise = meta_convert_P_T_FR_L('P', inletPressure_form, request.form.get('iPresUnit'),
                                                              'pa',
                                                              1000)
-                vaporPressure_noise = meta_convert_P_T_FR_L('P', vaporPressure, request.form.get('vPresUnit'), 'pa',
-                                                            1000)
-                flowrate_noise = meta_convert_P_T_FR_L('FR', flowrate_form, request.form.get('flowrate_unit'), 'm3/hr',
-                                                       1000)
-                inletPipeDia_noise = meta_convert_P_T_FR_L('L', inletPipeDia_form, request.form.get('iPipeUnit'), 'm',
-                                                           1000)
-                size_noise = meta_convert_P_T_FR_L('L', size, 'inch', 'm', 1000)
+                outletPressure_gnoise = meta_convert_P_T_FR_L('P', outletPressure_form, request.form.get('oPresUnit'),
+                                                              'pa',
+                                                              1000)
+                vaporPressure_gnoise = meta_convert_P_T_FR_L('P', vaporPressure, request.form.get('vPresUnit'), 'pa',
+                                                             1000)
+                flowrate_gnoise = conver_FR_noise(flowrate_form, fl_unit)
+                inletPipeDia_gnoise = meta_convert_P_T_FR_L('L', inletPipeDia_form, request.form.get('iPipeUnit'), 'm',
+                                                            specificGravity * 1000)
+                outletPipeDia_gnoise = meta_convert_P_T_FR_L('L', outletPipeDia_form, request.form.get('iPipeUnit'),
+                                                             'm',
+                                                             specificGravity * 1000)
+                size_gnoise = meta_convert_P_T_FR_L('L', size, 'inch', 'm', 1000)
 
                 # summation1 = summation(C=113.863, inletPressure=inletPressure_noise, outletPressure=outletPressure_noise, density=specificGravity*1000,
                 #                        vaporPressure=vaporPressure_noise,
@@ -2748,12 +2442,77 @@ def valveSizing():
                 #                        densityAir=1.293,
                 #                        holeDia=0, rW=0.25)
 
-                summation1 = summation(C=113.863, inletPressure=1000000, outletPressure=900000, density=974.1,
-                                       vaporPressure=10000,
-                                       speedS=4000, massFlowRate=27.06, Fd=0.23, densityPipe=7800, speedSinPipe=5000,
-                                       wallThicknessPipe=0.0002, internalPipeDia=0.1000, seatDia=0.1, valveDia=0.1,
-                                       densityAir=1.293,
-                                       holeDia=0, rW=0.25)
+                # molecular weight needs to be made on case to case basis = here we're taking 19.8, but it needs to come from form or table
+                if sg_unit == 'sg':
+                    mw = 28.96 * float(request.form.get('sg_value'))
+                elif sg_unit == 'mw':
+                    mw = float(request.form.get('sg_value'))
+
+                temp_gnoise = meta_convert_P_T_FR_L('T', inletTemp_form, request.form.get('iTempUnit'), 'K', 1000)
+                flp = fLP(Cv1, size, inletPipeDia_form)
+                fp = fP_gas(Cv1, size, inletPipeDia_form, outletPipeDia_form)
+                sigmeta = sigmaEta_gas(size, inletPipeDia_form, outletPipeDia_form)
+                if sigmeta == 0:
+                    sigmeta = 0.86
+                sc_initial_1 = {'valveSize': size_gnoise, 'valveOutletDiameter': outletPipeDia_gnoise, 'ratedCV': 236,
+                                'reqCV': 175,
+                                'No': 6,
+                                'FLP': flp,
+                                'Iw': 0.181, 'valveSizeUnit': 'm', 'IwUnit': 'm', 'A': 0.00137,
+                                'xT': float(request.form.get('xt')),
+                                'iPipeSize': inletPipeDia_gnoise,
+                                'oPipeSize': outletPipeDia_gnoise,
+                                'tS': 0.008, 'Di': outletPipeDia_gnoise, 'SpeedOfSoundinPipe_Cs': 5000,
+                                'DensityPipe_Ps': 8000,
+                                'densityUnit': 'kg/m3',
+                                'SpeedOfSoundInAir_Co': 343, 'densityAir_Po': 1.293, 'atmPressure_pa': 101325,
+                                'atmPres': 'pa',
+                                'stdAtmPres_ps': 101325, 'stdAtmPres': 'pa', 'sigmaEta': sigmeta, 'etaI': 1.2, 'Fp': fp,
+                                'massFlowrate': flowrate_gnoise, 'massFlowrateUnit': 'kg/s',
+                                'iPres': inletPressure_gnoise, 'iPresUnit': 'pa',
+                                'oPres': outletPressure_gnoise, 'oPresUnit': 'pa', 'inletDensity': 5.3,
+                                'iAbsTemp': temp_gnoise,
+                                'iAbsTempUnit': 'K',
+                                'specificHeatRatio_gamma': specificGravity, 'molecularMass': mw, 'mMassUnit': 'kg/kmol',
+                                'internalPipeDia': inletPipeDia_gnoise,
+                                'aEta': -3.8, 'stp': 0.2, 'R': 8314, 'RUnit': "J/kmol x K", 'fs': 1}
+
+                sc_initial_2 = {'valveSize': size_gnoise, 'valveOutletDiameter': outletPipeDia_gnoise, 'ratedCV': 195, 'reqCV': Cv1, 'No': 6,
+                                'FLP': 0.789,
+                                'Iw': 0.181, 'valveSizeUnit': 'm', 'IwUnit': 'm', 'A': 0.00137, 'xT': float(request.form.get('xt')),
+                                'iPipeSize': inletPipeDia_gnoise,
+                                'oPipeSize': outletPipeDia_gnoise,
+                                'tS': 0.008, 'Di': inletPipeDia_gnoise, 'SpeedOfSoundinPipe_Cs': 5000, 'DensityPipe_Ps': 8000,
+                                'densityUnit': 'kg/m3',
+                                'SpeedOfSoundInAir_Co': 343, 'densityAir_Po': 1.293, 'atmPressure_pa': 101325,
+                                'atmPres': 'pa',
+                                'stdAtmPres_ps': 101325, 'stdAtmPres': 'pa', 'sigmaEta': 0.86, 'etaI': 1.2, 'Fp': 0.98,
+                                'massFlowrate': 2.2, 'massFlowrateUnit': 'kg/s', 'iPres': inletPressure_gnoise, 'iPresUnit': 'pa',
+                                'oPres': outletPressure_gnoise, 'oPresUnit': 'pa', 'inletDensity': 5.3, 'iAbsTemp': temp_gnoise,
+                                'iAbsTempUnit': 'K',
+                                'specificHeatRatio_gamma': specificGravity, 'molecularMass': 19.8, 'mMassUnit': 'kg/kmol',
+                                'internalPipeDia': 0.2031,
+                                'aEta': -3.8, 'stp': 0.2, 'R': 8314, 'RUnit': "J/kmol x K", 'fs': 1}
+
+                sc_initial = sc_initial_2
+                print(sc_initial)
+
+                summation1 = lpae_1m(sc_initial['specificHeatRatio_gamma'], sc_initial['iPres'], sc_initial['oPres'],
+                                     sc_initial['FLP'],
+                                     sc_initial['Fp'],
+                                     sc_initial['inletDensity'], sc_initial['massFlowrate'], sc_initial['aEta'],
+                                     sc_initial['R'],
+                                     sc_initial['iAbsTemp'],
+                                     sc_initial['molecularMass'], sc_initial['oPipeSize'],
+                                     sc_initial['internalPipeDia'], sc_initial['stp'],
+                                     sc_initial['No'],
+                                     sc_initial['A'], sc_initial['Iw'], sc_initial['reqCV'],
+                                     sc_initial['SpeedOfSoundinPipe_Cs'],
+                                     sc_initial['SpeedOfSoundInAir_Co'],
+                                     sc_initial['valveSize'], sc_initial['tS'], sc_initial['fs'],
+                                     sc_initial['atmPressure_pa'],
+                                     sc_initial['stdAtmPres_ps'], sc_initial['DensityPipe_Ps'])
+                # summation1 = 97
 
                 # Power Level
                 # getting fr in lb/s
@@ -2896,8 +2655,10 @@ def addItem():
             itemsList = [item4]
 
             for i in itemsList:
-                new_item = itemMaster(alt=i['alt'], tag_no=i['tagNo'], serial=i['serial'], size=i['size'], model=i['model'],
-                                      type=i['type'], rating=i['rating'], material=i['material'], unit_price=i['unitPrice'],
+                new_item = itemMaster(alt=i['alt'], tag_no=i['tagNo'], serial=i['serial'], size=i['size'],
+                                      model=i['model'],
+                                      type=i['type'], rating=i['rating'], material=i['material'],
+                                      unit_price=i['unitPrice'],
                                       qty=i['Quantity'], project=i['Project'])
 
                 db.session.add(new_item)
@@ -2905,7 +2666,8 @@ def addItem():
 
             return redirect(url_for('home'))
 
-        return render_template('addItem.html', item_d=selected_item, series=series, size=size, type=type, rating=rating_1,
+        return render_template('addItem.html', item_d=selected_item, series=series, size=size, type=type,
+                               rating=rating_1,
                                material=material)
 
 
@@ -2953,8 +2715,5 @@ def generate_csv():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
 
 # Hi da Paandi - github testdddaaakkkkkkkkkkkkkkkk
