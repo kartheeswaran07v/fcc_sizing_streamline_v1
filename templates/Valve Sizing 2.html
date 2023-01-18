@@ -46,19 +46,27 @@
               <p style="border: groove; border-radius: 0px;">AQ {{item_d.tag_no}} 00{{item_d.id}} {{item_d.alt}}</p>
             </div>
             <div class="col-3">
-              <i class="fa-solid fa-backward-fast fa-1x"></i><br>
+              <a href="{{url_for('nextItem', control='first')}}">
+                <i class="fa-solid fa-backward-fast fa-1x"></i><br>
+              </a>
               <label for="">First</label>
             </div>
             <div class="col-3">
-              <i class="fa-solid fa-backward-step fa-1x"></i><br>
+              <a href="{{url_for('nextItem', control='prev')}}">
+                <i class="fa-solid fa-backward-step fa-1x"></i><br>
+              </a>
               <label for="">Prev.</label>
             </div>
             <div class="col-3">
-              <i class="fa-solid fa-forward-step fa-1x"></i><br>
+              <a href="{{url_for('nextItem', control='next')}}">
+                <i class="fa-solid fa-forward-step fa-1x"></i><br>
+              </a>
               <label for="">Next</label>
             </div>
             <div class="col-3">
-              <i class="fa-solid fa-forward-fast fa-1x"></i><br>
+              <a href="{{url_for('nextItem', control='last')}}">
+                <i class="fa-solid fa-forward-fast fa-1x"></i><br>
+              </a>
               <label for="">Last</label>
             </div>
           </div>
@@ -244,16 +252,26 @@
                   <td style="width:90px;"><input id='iTemp' name="iTemp" style="width:90px;border: 1px solid white;"></input></td>
 
                 </tr>
+                {% if fState == 'Liquid' %}
+                  <tr>
+                    <td><label style="margin-left:5px;" for="sGravity">Specific Gravity</label></td>
+                    <td style="width:90px;"><input style="width:90px;border: 1px solid white;"></input></td>
+                    {% for i in cases %}
+                      <td class="">{{i.sGravity}}</td>
+                    {% endfor %}
+                    <td style="width:90px;"><input id='sGravity' name="sGravity" style="width:90px;border: 1px solid white;"></input></td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td><label style="margin-left:5px;" for="sGravity">Specific Heat Ratio</label></td>
+                    <td style="width:90px;"><input style="width:90px;border: 1px solid white;"></input></td>
+                    {% for i in cases %}
+                      <td class="">{{i.sGravity}}</td>
+                    {% endfor %}
+                    <td style="width:90px;"><input name="sGravity" style="width:90px;border: 1px solid white;"></input></td>
+                  </tr>
+                {% endif %}
 
-                <tr>
-                  <td><label style="margin-left:5px;" for="sGravity">Specific Gravity</label></td>
-                  <td style="width:90px;"><input style="width:90px;border: 1px solid white;"></input></td>
-                  {% for i in cases %}
-                    <td class="">{{i.sGravity}}</td>
-                  {% endfor %}
-                  <td style="width:90px;"><input id='sGravity' name="sGravity" style="width:90px;border: 1px solid white;"></input></td>
-
-                </tr>
 
                 <tr>
                   <td><label style="margin-left:5px;" for="vPressure">Vapor Pressure</label></td>
@@ -299,20 +317,22 @@
                   <td style="width:90px;"><input id="viscosity" name='viscosity' style="width:90px;border: 1px solid white;"></input></td>
 
                 </tr>
+                {% if fState == 'Gas' %}
+                  <tr>
+                    <td><label style="margin-left:5px;" for="">MW/SG</label></td>
+                    <td>
+                      <select name="sg" style="width:90px; height: 23px;border: 1px solid white;">
+                        <option value="sg">Specific Gravity</option>
+                        <option value="mw">Molecular Weight</option>
+                      </select>
+                    </td>
+                    {% for i in cases %}
+                      <td class="">{{i.vaporMW}}</td>
+                    {% endfor %}
+                    <td style="width:90px;"><input name="sg_value" style="width:90px;border: 1px solid white;"></input></td>
+                  </tr>
+                {% endif %}
 
-                <tr>
-                  <td><label style="margin-left:5px;" for="">MW/SG</label></td>
-                  <td>
-                    <select name="sg" style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="sg">Specific Gravity</option>
-                      <option value="mw">Molecular Weight</option>
-                    </select>
-                  </td>
-                  {% for i in cases %}
-                    <td class="">{{i.vaporMW}}</td>
-                  {% endfor %}
-                  <td style="width:90px;"><input name="sg_value" style="width:90px;border: 1px solid white;"></input></td>
-                </tr>
 
                 <tr>
                   <td><label style="margin-left:5px;" for="">Vapor.Inlet</label></td>
@@ -428,7 +448,7 @@
                 </tr>
 
                 <tr>
-                  <td><label style="margin-left:5px;" for="">Sigma</label></td>
+                  <td><label style="margin-left:5px;" for="">Power Lvl.(kw)</label></td>
                   <td></td>
                   {% for i in cases %}
                     <td class="">{{i.sigmaMR}}</td>
@@ -436,14 +456,14 @@
                   <td style="width:90px;"><input style="width:90px;border: 1px solid white;"></td>
                 </tr>
 
-                <tr>
-                  <td><label style="margin-left:5px;" for="">Sigma MR</label></td>
-                  <td></td>
-                  {% for i in cases %}
-                    <td class="">{{i.sigmaMR}}</td>
-                  {% endfor %}
-                  <td style="width:90px;"><input style="width:90px;border: 1px solid white;"></td>
-                </tr>
+<!--                <tr>-->
+<!--                  <td><label style="margin-left:5px;" for="">Sigma MR</label></td>-->
+<!--                  <td></td>-->
+<!--                  {% for i in cases %}-->
+<!--                    <td class="">{{i.sigmaMR}}</td>-->
+<!--                  {% endfor %}-->
+<!--                  <td style="width:90px;"><input style="width:90px;border: 1px solid white;"></td>-->
+<!--                </tr>-->
 
                 <tr>
                   <td><label style="margin-left:5px;" for="">Required Stages</label></td>
@@ -566,7 +586,7 @@
 
           <div class="row" style="margin-top:20px;">
             <div class="col-12 tools ">
-              <h5 class="" style="text-align:left;">Pipe Data</h5>
+              <h5 class="" style="text-align:left;">Pipe & Valve Data</h5>
               <div class="row" style="margin-top:10px;">
                 <div class="col-5" style='text-align: right;'>
                   <label for="iPipeSize">Inlet Pipe Size</label>
@@ -617,6 +637,29 @@
                     {% endfor %}
                   </select>
                 </div>
+                <div class="col-5" style='text-align: right;'>
+                  <label for="vSize">Valve Size</label>
+                </div>
+                <div class="col-2">
+                  <input type="text" name="vSize" id="vSize" value="" style="width: 70px;height: 25px;">
+                </div>
+
+                <div class="col-1">
+                  <select name="vSizeUnit" style="width: 50px;height:25px;">
+                    {% for i in length_unit %}
+                    <option value="{{i.id}}">{{i.name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-5" style='text-align: right;'>
+                  <label for="ratedCV">Rated CV</label>
+                </div>
+
+                <div class="col-2">
+                  <input type="text" name="ratedCV" id="ratedCv" value="" style="width: 70px;height: 25px;">
+                </div>
+
 
 <!--                <div class="col-5" style='text-align: right;height:25px;'>-->
 <!--                  <label for="">Schedule Thickness</label>-->
