@@ -35,7 +35,10 @@
               <i class="fa-solid fa-upload fa-1x" data-toggle="tooltip" title="Export Project"></i>
             </div>
             <div class="col-2">
-              <i class="fa-solid fa-sliders fa-1x" data-toggle="tooltip" title="Preference"></i>
+              <a href="{{url_for('preferences')}}">
+                <i class="fa-solid fa-sliders fa-1x" data-toggle="tooltip" title="Preference"></i>
+              </a>
+
             </div>
           </div>
         </div>
@@ -151,11 +154,9 @@
                   <td><label style="margin-left:5px;" for="flowrate">Flowrate</label></td>
                   <td>
                     <select name="flowrate_unit" id="unit" style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="m3/hr">m3/hr</option>
-                      <option value="scfh">scfh</option>
-                      <option value="gpm">gpm</option>
-                      <option value="lb/hr">lb/hr</option>
-                      <option value="kg/hr">kg/hr</option>
+                      {% for i in length_unit[1] %}
+                        <option value="{{i.id}}">{{i.name}}</option>
+                      {% endfor %}
                     </select>
                   </td>
                   {% for i in cases %}
@@ -170,28 +171,9 @@
                   <td><label style="margin-left:5px;" for="iPressure">Inlet Pressure</label></td>
                   <td>
                     <select name="iPresUnit" style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="bar">bar(g)</option>
-                      <option value="bar">bar(a)</option>
-                      <option value="kpa">KPa(a)</option>
-                      <option value="kpa">KPa(g)</option>
-                      <option value="mpa">MPa(a)</option>
-                      <option value="mpa">MPa(g)</option>
-                      <option value="pa">Pa(a)</option>
-                      <option value="pa">Pa(g)</option>
-                      <option value="inh20">in H2O(a)</option>
-                      <option value="inh20">in H2O(g)</option>
-                      <option value="inhg">in Hg(a)</option>
-                      <option value="inhg">in Hg(g)</option>
-                      <option value="kg/cm2">kg/cm²(a)</option>
-                      <option value="kg/cm2">kg/cm²(g)</option>
-                      <option value="">m H20(a)</option>
-                      <option value="mmh20">m H20(g)</option>
-                      <option value="mbar">mbar(a)</option>
-                      <option value="mbar">mbar(g)</option>
-                      <option value="mmhg">mm Hg(a)</option>
-                      <option value="mmhg">mm Hg(g)</option>
-                      <option value="psia">psi(a)</option>
-                      <option value="psia">psi(g)</option>
+                      {% for i in length_unit[2] %}
+                        <option value="{{i.id}}">{{i.name}}</option>
+                      {% endfor %}
                     </select>
                   </td>
                   {% for i in cases %}
@@ -205,28 +187,9 @@
                   <td><label style="margin-left:5px;" for="oPressure">Outlet Pressure</label></td>
                   <td>
                     <select name="oPresUnit" style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="bar">bar(g)</option>
-                      <option value="bar">bar(a)</option>
-                      <option value="kpa">KPa(a)</option>
-                      <option value="kpa">KPa(g)</option>
-                      <option value="mpa">MPa(a)</option>
-                      <option value="mpa">MPa(g)</option>
-                      <option value="pa">Pa(a)</option>
-                      <option value="pa">Pa(g)</option>
-                      <option value="inh20">in H2O(a)</option>
-                      <option value="inh20">in H2O(g)</option>
-                      <option value="inhg">in Hg(a)</option>
-                      <option value="inhg">in Hg(g)</option>
-                      <option value="kg/cm2">kg/cm²(a)</option>
-                      <option value="kg/cm2">kg/cm²(g)</option>
-                      <option value="">m H20(a)</option>
-                      <option value="mmh20">m H20(g)</option>
-                      <option value="mbar">mbar(a)</option>
-                      <option value="mbar">mbar(g)</option>
-                      <option value="mmhg">mm Hg(a)</option>
-                      <option value="mmhg">mm Hg(g)</option>
-                      <option value="psia">psi(a)</option>
-                      <option value="psia">psi(g)</option>
+                      {% for i in length_unit[2] %}
+                        <option value="{{i.id}}">{{i.name}}</option>
+                      {% endfor %}
                     </select>
                   </td>
                   {% for i in cases %}
@@ -240,10 +203,9 @@
                   <td><label style="margin-left:5px;" for="iTemp">Inlet Temprature</label></td>
                   <td>
                     <select name="iTempUnit" style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="C">°C</option>
-                      <option value="F">°F</option>
-                      <option value="K">K</option>
-                      <option value="R">R</option>
+                      {% for i in length_unit[3] %}
+                        <option value="{{i.id}}">{{i.name}}</option>
+                      {% endfor %}
                     </select>
                   </td>
                   {% for i in cases %}
@@ -277,28 +239,9 @@
                   <td><label style="margin-left:5px;" for="vPressure">Vapor Pressure</label></td>
                   <td>
                     <select name="vPresUnit" style="width:90px; height: 23px;border: 1px solid white;">
-                      <option value="bar">bar(g)</option>
-                      <option value="bar">bar(a)</option>
-                      <option value="kpa">KPa(a)</option>
-                      <option value="kpa">KPa(g)</option>
-                      <option value="mpa">MPa(a)</option>
-                      <option value="mpa">MPa(g)</option>
-                      <option value="pa">Pa(a)</option>
-                      <option value="pa">Pa(g)</option>
-                      <option value="inh20">in H2O(a)</option>
-                      <option value="inh20">in H2O(g)</option>
-                      <option value="inhg">in Hg(a)</option>
-                      <option value="inhg">in Hg(g)</option>
-                      <option value="kg/cm2">kg/cm²(a)</option>
-                      <option value="kg/cm2">kg/cm²(g)</option>
-                      <option value="">m H20(a)</option>
-                      <option value="mmh20">m H20(g)</option>
-                      <option value="mbar">mbar(a)</option>
-                      <option value="mbar">mbar(g)</option>
-                      <option value="mmhg">mm Hg(a)</option>
-                      <option value="mmhg">mm Hg(g)</option>
-                      <option value="psia">psi(a)</option>
-                      <option value="psia">psi(g)</option>
+                      {% for i in length_unit[2] %}
+                        <option value="{{i.id}}">{{i.name}}</option>
+                      {% endfor %}
                     </select>
                   </td>
                   {% for i in cases %}
@@ -533,12 +476,20 @@
                 <div class="col-5" style='text-align: right;'>
                   <label for="fState">Fluid State</label>
                 </div>
+<!--                <div col-3>-->
+<!--                  {% if fState == 'Liquid' %}-->
+<!--                  <input style="width: 70px;height: 25px;" value="Liquid" readonly>-->
+<!--                  {% else %}-->
+<!--                  <input style="width: 70px;height: 25px;" value="Gas" readonly id="fState">-->
+<!--                  {% endif %}-->
+<!--                </div>-->
 
                 <div class="col-3">
-                  <select id="fState" name="fState" style=" height: 25px; width: 70px;">
-                    <option value="Liquid">Liquid</option>
-                    <option value="Gas">Gas</option>
-                  </select>
+                  {% if fState == 'Liquid' %}
+                  <input style="width: 70px;height: 25px;" value="Liquid" readonly name="fState">
+                  {% else %}
+                  <input style="width: 70px;height: 25px;" value="Gas" readonly id="fState" name="fState">
+                  {% endif %}
                 </div>
 
                 <div class="col-5" style='text-align: right;'>
@@ -547,32 +498,13 @@
                 <div class="col-3">
                   <input type="text" name="cPressure" id="cPressure" value="" style="width: 70px;height: 25px;">
                 </div>
-                <div class="col-3">
-                  <select name="cPresUnit"  style=" height: 25px; width: 80px;padding-left: 10px;">
-                    <option value="bar">bar(g)</option>
-                      <option value="bar">bar(a)</option>
-                      <option value="kpa">KPa(a)</option>
-                      <option value="kpa">KPa(g)</option>
-                      <option value="mpa">MPa(a)</option>
-                      <option value="mpa">MPa(g)</option>
-                      <option value="pa">Pa(a)</option>
-                      <option value="pa">Pa(g)</option>
-                      <option value="inh20">in H2O(a)</option>
-                      <option value="inh20">in H2O(g)</option>
-                      <option value="inhg">in Hg(a)</option>
-                      <option value="inhg">in Hg(g)</option>
-                      <option value="kg/cm2">kg/cm²(a)</option>
-                      <option value="kg/cm2">kg/cm²(g)</option>
-                      <option value="">m H20(a)</option>
-                      <option value="mmh20">m H20(g)</option>
-                      <option value="mbar">mbar(a)</option>
-                      <option value="mbar">mbar(g)</option>
-                      <option value="mmhg">mm Hg(a)</option>
-                      <option value="mmhg">mm Hg(g)</option>
-                      <option value="psia">psi(a)</option>
-                      <option value="psia">psi(g)</option>
-                  </select>
-                </div>
+<!--                <div class="col-3">-->
+<!--                  <select name="cPresUnit"  style=" height: 25px; width: 80px;padding-left: 10px;">-->
+<!--                    {% for i in length_unit[2] %}-->
+<!--                      <option value="{{i.id}}">{{i.name}}</option>-->
+<!--                    {% endfor %}-->
+<!--                  </select>-->
+<!--                </div>-->
               </div>
             </div>
           </div>
@@ -597,8 +529,8 @@
 
                 <div class="col-1">
                   <select name="iPipeUnit" id="" style="width: 50px;height:25px;">
-                    {% for i in length_unit %}
-                    <option value="{{i.id}}">{{i.name}}</option>
+                    {% for i in length_unit[0] %}
+                      <option value="{{i.id}}">{{i.name}}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -632,8 +564,8 @@
 
                 <div class="col-1">
                   <select name="oPipeUnit" style="width: 50px;height:25px;">
-                    {% for i in length_unit %}
-                    <option value="{{i.id}}">{{i.name}}</option>
+                    {% for i in length_unit[0] %}
+                      <option value="{{i.id}}">{{i.name}}</option>
                     {% endfor %}
                   </select>
                 </div>
@@ -646,8 +578,8 @@
 
                 <div class="col-1">
                   <select name="vSizeUnit" style="width: 50px;height:25px;">
-                    {% for i in length_unit %}
-                    <option value="{{i.id}}">{{i.name}}</option>
+                    {% for i in length_unit[0] %}
+                      <option value="{{i.id}}">{{i.name}}</option>
                     {% endfor %}
                   </select>
                 </div>

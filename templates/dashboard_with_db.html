@@ -148,7 +148,12 @@
           <tbody>
             {% for i in data %}
             <tr>
-              <td><input type="radio" id="project{{i.id}}" name="projects" value="{{i.id}}"></td>
+              {% if i.id == 1 %}
+              <td><input type="radio" id="project{{i.id}}" name="projects" value="{{i.id}}" checked></td>
+              {% else %}
+              <td><input type="radio" id="project" name="projects" value="{{i.id}}"></td>
+              {% endif %}
+
               <td>{{i.IndustryID}}</td>
               <td>{{i.regionID}}</td>
               <td>{{i.quote}}</td>
@@ -195,7 +200,11 @@
         <tbody>
           {% for i in data2 %}
           <tr>
-            <td><input type="radio" id="item{{i.id}}" name="item" value="{{i.id}}"></td>
+            {% if i.id == 1 %}
+            <td><input type="radio" id="item{{i.id}}" name="item" value="{{i.id}}" checked></td>
+            {% else %}
+            <td><input type="radio" id="item" name="item" value="{{i.id}}"></td>
+            {% endif %}
             <td>{{i.id}}</td>
             <td>{{i.alt}}</td>
             <td>{{i.tag_no}}</td>
